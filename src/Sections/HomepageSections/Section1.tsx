@@ -35,8 +35,8 @@ const Section1 = () => {
           <div className='hidden tablet:visible tablet:flex flex-col gap-y-5  items-center justify-center'>
             <img src={nightMode} alt="night-image" className='h-5 laptop:h-7'/>
             <Bell className='h-5 laptop:h-7'/>
-            <img src={discord} alt="" className='h-6 laptop:h-7'/>
-            <img src={insta} alt="" className='h-5 laptop:h-7'/>
+            <a href="https://discord.com/" target="_blank"><img src={discord} alt="" className='h-6 laptop:h-7'/></a>
+            <a href="https://instagram.com/" target="_blank"><img src={insta} alt="" className='h-5 laptop:h-7'/></a>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from 'axios';
-import { LoginInterface, SignupInterface } from "../UserTypes/userInterface";
+import { LoginInterface, SignupInterface, ContactInterface } from "../UserTypes/userInterface";
 import Cookies from "js-cookie";
 
 export const signUp = createAsyncThunk('user/signup', async (data : SignupInterface, thunkApi) => {
@@ -33,6 +33,20 @@ export const login = createAsyncThunk('user/login', async (data : LoginInterface
         Cookies.set('id', id)
         Cookies.set('jwt', jwt)
         return {id, name, jwt}
+    } catch (error) {
+        return thunkApi.rejectWithValue((error as Error).message);
+    }
+})
+
+export const contact = createAsyncThunk('contact', async (data : ContactInterface, thunkApi) => {
+    try {
+        const responseData = await axios({
+            method: 'post',
+            url: `http://localhost:1337/api/contacts`,
+            data: {data}
+        })
+        console.log(responseData.data)
+        const {firstName, lastName, email, inquiry} = responseData.data
     } catch (error) {
         return thunkApi.rejectWithValue((error as Error).message);
     }
