@@ -19,3 +19,12 @@ export interface LoginInterface {
     identifier: string;
     password: string;
 }
+
+
+export interface ContactInterface {
+    firstName: string;
+    lastName: string;
+    email: string;
+    inquiry?: string;
+}
+
