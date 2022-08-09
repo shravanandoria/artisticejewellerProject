@@ -5,7 +5,7 @@ import tether from '../../assets/icons/tether.png'
 import Card from '../../assets/Card.png'
 import nightMode from '../../assets/icons/moon.png'
 import Bell from "@heroicons/react/solid/BellIcon"
-import discord from '../../assets/icons/discord.png';
+import twitter from '../../assets/social_icons/twitter.png';
 import insta from '../../assets/icons/instagram.png';
 
 const Section1 = () => {
@@ -35,8 +35,8 @@ const Section1 = () => {
           <div className='hidden tablet:visible tablet:flex flex-col gap-y-5  items-center justify-center'>
             <img src={nightMode} alt="night-image" className='h-5 laptop:h-7'/>
             <Bell className='h-5 laptop:h-7'/>
-            <img src={discord} alt="" className='h-6 laptop:h-7'/>
-            <img src={insta} alt="" className='h-5 laptop:h-7'/>
+            <a href="https://www.instagram.com/theartisticjeweller/" target="_blank"><img src={insta} alt="" className='h-5 laptop:h-7'/></a>
+            <a href="https://twitter.com/jeweller_aj" target="_blank"><img src={twitter} alt="" className='h-6 laptop:h-7'/></a>
           </div>
         </div>
       </div>
