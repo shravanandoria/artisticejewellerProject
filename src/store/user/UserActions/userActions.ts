@@ -52,3 +52,17 @@ export const contact = createAsyncThunk('contact', async (data : ContactInterfac
         return thunkApi.rejectWithValue((error as Error).message);
     }
 })
+
+export const ssrajuu = createAsyncThunk('contact', async (data : ContactInterface , thunkApi) => {
+    try {
+        const responseData = await axios({
+            method: 'post',
+            url: `http://localhost:1337/api/contacts`,
+            data: {data}
+        })
+        console.log(responseData.data)
+        const {firstName, lastName, email, inquiry} = responseData.data
+    } catch (error) {
+        return thunkApi.rejectWithValue((error as Error).message);
+    }
+})
