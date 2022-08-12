@@ -11,7 +11,7 @@ const initialState : initialStateInterface = {
     isLoading: false
 }
 
-export const userSlice = createSlice({
+const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {

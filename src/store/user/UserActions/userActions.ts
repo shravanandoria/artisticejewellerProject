@@ -10,7 +10,6 @@ export const signUp = createAsyncThunk('user/signup', async (data : SignupInterf
             url: `http://localhost:1337/api/auth/local/register`,
             data
         })
-        console.log(responseData.data)
         const {user: {name, id, username, email, dob, followers, following, profilePic}, jwt} = responseData.data
         Cookies.set('name', name)
         Cookies.set('id', id)

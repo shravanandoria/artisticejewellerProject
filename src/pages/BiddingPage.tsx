@@ -3,27 +3,46 @@ import BtnPrimary from '../components/BtnPrimary';
 import eth from '../assets/icons/ethereum.png';
 import XIcon from '@heroicons/react/solid/XIcon';
 import axios from 'axios'
-import spinner from '../assets/spinner.gif';
-
+import { useDispatch } from 'react-redux';
+import { nftBidding } from '../store/nft/nftSlice';
 //Marketplace Imports
 import { useAddress } from '@thirdweb-dev/react';
 import { useMarketplace, useActiveListings } from '@thirdweb-dev/react';
 import { AuctionListing } from '@thirdweb-dev/sdk';
-import React, { useState, useEffect, ChangeEventHandler, FormEvent, ChangeEvent, FormEventHandler, FC } from 'react';
+import React, { useState, ChangeEventHandler, ChangeEvent, FC, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import Spinner from '../components/Spinner';
 
 //user image
-import u1 from '../assets/users/u1.jpg'
-import u2 from '../assets/users/u2.jpg'
-import u3 from '../assets/users/u3.jpg'
-import u4 from '../assets/users/u4.jpg'
-import u5 from '../assets/users/u5.jpg'
+import u1 from '../assets/users/u1.jpg';
+import u2 from '../assets/users/u2.jpg';
+import u3 from '../assets/users/u3.jpg';
+import u4 from '../assets/users/u4.jpg';
+import u5 from '../assets/users/u5.jpg';
+import { AppDispatch } from '../store/store';
+
+
+// attributes:
+// createdAt: "2022-08-12T13:05:33.198Z"
+// name: "dasd"
+// nftId: 38
+// price: 0.04
+// publishedAt: "2022-08-12T13:05:33.194Z"
+// updatedAt: "2022-08-12T13:05:33.198Z"
+// [[Prototype]]: Object
+// id: 5
+
+interface bidderInterface {
+    id: number;
+    attributes: {name: string; publishedAt: string; price: string, profilePic?: string}
+}
 
 interface BidItemProps {
-    profile: string;
-    id: string;
-    date: string;
+    profile?: string;
+    id: number;
+    date?: string;
+    price: string;
+    name: string;
 }
 
 const fakeBidData = [
@@ -54,14 +73,16 @@ const fakeBidData = [
     },
 ]
 
-const BidItem: FC<BidItemProps> = ({id, date, profile}) => {
+//Bid Item Component
+const BidItem : FC<BidItemProps> = ({date,  profile, price, name, id}) => {
     return <>
     <div className='my-6 '>
+        <div>{price}</div>
         <div className='flex items-center gap-x-3 '>
-            <img src={profile} alt="user" className='h-10 w-10 rounded-full' />
+            <img src={u1} alt="user" className='h-10 w-10 rounded-full' />
             <div className='text-xs laptop:text-sm'>
-                <p>Listed for resell by <b>{id}</b></p>
-                <p className='text-gray-500 text-sm'>{date}</p>
+                <p>Listed for resell by <b>{name}</b></p>
+                <p className='text-gray-500 text-sm'>22 aug</p>
             </div>
         </div>
     </div>
@@ -77,7 +98,7 @@ interface BidModalProps {
     errorMessage?: string;
 }
 
-//Modal of bidding popup
+//Bid Modal Popup
 const BidPopup = ({setModalOpen, reservePrice, handleChange, onSubmit, loading, errorMessage} : BidModalProps) => (
     <>
     <form onSubmit={onSubmit}>
@@ -119,52 +140,65 @@ const BidPopup = ({setModalOpen, reservePrice, handleChange, onSubmit, loading, 
     </>
 );
 
+const nftId = 11
+
 const BiddingPage = () => {
     //Marketplace
+    const dispatch = useDispatch<AppDispatch>();
     const address = useAddress();
     const marketplace = useMarketplace("0x723A0E4d2949e1Fc7aC43942FE5A9b3f14cA7991");
-    const { data: listing, isLoading, error } = useActiveListings(marketplace);
-    console.log(listing)    
-    const listingInfo = listing as AuctionListing[];
+    const { data: listing, isLoading, error } = useActiveListings(marketplace, {tokenId: nftId});
+    const { data } = useActiveListings(marketplace);
+    const listingInfo = data as AuctionListing[];
+
+    const [bidders, setBidders] = useState<bidderInterface[]>()
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [bidPrice, setBidPrice] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [errorMessage, setError] = useState<string>('')
-    const jwt = Cookies.get('jwt')
+    const [errorMessage, setError] = useState<string>('');
+    const jwt = Cookies.get('jwt');
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setBidPrice(e.target.value)
     }
-    
-    const handleSubmit = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    const handleSubmit = async (e: React.ChangeEvent<HTMLInputElement>, tokenId : string) => {
         e.preventDefault();
-        if(!address) return setError('Please connect your wallet');
+        setError('')
         setLoading(true)
         try {
-            const bid = await axios({
-                url: 'http://localhost:1337/api/nfts',
-                method: 'post',
-                headers: {
-                    Authorization: `Bearer ${jwt}`
-                },
-                data : {data: {nftName: 'spiderman', tokenId: "2", nftArtist: "shravan"}}
-            });
-            console.log(bid)
+        const nftListingId = listingInfo[0].id.toString();
+        const bid = await marketplace?.auction.makeBid(nftListingId, bidPrice)
+        console.log({bid})
+        if(!bid) return console.log('something not working');
+        dispatch(nftBidding({nftName: `${listingInfo[0].asset.name}`, bidPrice, nftId: listingInfo[0].id}))
         } catch (error) {
-            console.log(error)
-            setError((error as Error).message.slice(0,50))
+            setError("Transaction failed")
         }
         setLoading(false)
     }
-        
+
+    const fetchBidsData = async () => {
+            const res = await axios({
+                url: `http://localhost:1337/api/nfts?filters[nftId]=${nftId}&populate=bids`,
+                method: 'get'
+            });
+            const {data} = res;
+            setBidders(data.data[0].attributes.bids.data)
+    }
+
+    useEffect(() => {
+        fetchBidsData()
+    }, []);
+
     return (
         <>
             {isLoading ? <div><Spinner/></div> : !listingInfo[0] ? "nft auction over" : 
-            <div >
+            <div>
                 {/* MODAL POPUP */}
                 {modalOpen &&
                 <div>
-                    <BidPopup setModalOpen={setModalOpen} reservePrice={listingInfo[0].reservePriceCurrencyValuePerToken.displayValue} handleChange={handleChange} onSubmit={handleSubmit} loading={loading} errorMessage={errorMessage}/>
+                    <BidPopup setModalOpen={setModalOpen} reservePrice={listingInfo[0].reservePriceCurrencyValuePerToken.displayValue} handleChange={handleChange} onSubmit={(e: ChangeEvent<HTMLInputElement>) => handleSubmit(e, listingInfo[0].tokenId.toString())} loading={loading} errorMessage={errorMessage}/>
                 </div>
                 }
                 {error && <div className={`bg-red-500 text-white w-full h-1/2 text-center p-3 font-bold`}>{error}</div>}
@@ -174,6 +208,7 @@ const BiddingPage = () => {
 
                     {/* LEFT CONTENT */}
                     <div className='tablet:w-1/2 laptop:mb-10'>
+
                         {/* NFT image */}
                         <div className='rounded-xl p-3 shadow-md border h-72 laptop:h-96 w-fit'>
                             <img src={listingInfo[0].asset.image?.toString()} alt="nftImage" className='rounded-xl h-full w-full object-contain'/>
@@ -220,7 +255,7 @@ const BiddingPage = () => {
                                 </p>
                             </div>
                             {/* {listing[0].reservePriceCurrencyValuePerToken &&  */}
-                            {/* <div className='text-xs flex flex-col justify-center text-center laptop:text-lg'>
+                            <div className='text-xs flex flex-col justify-center text-center laptop:text-lg'>
                                 <div className='flex items-center space-x-2 justify-center laptop:mb-3'>
                                     <img src={timer} alt="timer" className='h-5 w-4' />
                                     <h1 className='laptop:text-md font-semibold text-[#766776] '>Auction ending in:</h1>
@@ -237,7 +272,7 @@ const BiddingPage = () => {
                                         <p>secs</p>
                                     </div>
                                 </div>
-                            </div> */}
+                            </div>
                             
                         </div>
                         <div className='flex items-center justify-between my-5 laptop:my-16'>
@@ -257,14 +292,12 @@ const BiddingPage = () => {
                         </div>
                         <div className='mt-9'>
                             <div className='flex space-x-3 font-semibold my-3 laptop:text-lg laptop:space-x-7'>
-                                <p className='text-[#E20EF9]'>History</p>
-                                <p>Offers</p>
-                                <p>Properties</p>
+                                <p className='text-[#E20EF9]'>Biddings</p>
                             </div>
                             <hr className='bg-black mt-5' style={{height: '2px'}} />
-                            {fakeBidData.map((item) => (
-                                <BidItem profile={item.profile} id={item.id} date={item.date} />
-                            ))}
+                            {bidders && bidders.length > 0 ? bidders.map((item) => (
+                                <BidItem key={item.id} name={item.attributes.name} price={item.attributes.price} id={item.id}/>
+                            )).reverse() : <p className='text-black'>No biddings</p>}
                         </div>
                     </div>
                 </div>

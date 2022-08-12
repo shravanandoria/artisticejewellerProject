@@ -32,7 +32,7 @@ const CreatosPage = () => {
       <MobileFIlter className='laptop:hidden' isSidebarOpen={openFilter} setOpenFilter={setOpenFilter}/>
 
       <div id='container' className='my-5'>
-        <div id='filter-section' className='px-4 border-b-0 shadow-md pb-2'>
+        <div id='filter-section' className='px-4 border-b-0  pb-2'>
             <Filter setOpenFilter={setOpenFilter}/>
         </div>
 

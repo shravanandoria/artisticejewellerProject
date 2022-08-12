@@ -22,6 +22,7 @@ import j5 from '../assets/jewellery_assets/5.png'
 //Thirdweb imports
 import { useAddress } from '@thirdweb-dev/react'
 import { useMetamask } from '@thirdweb-dev/react'
+import { useDisconnect } from '@thirdweb-dev/react'
 import NFTCard from './NFTCard'
 const Menu = ['Explore', 'Creators', 'Collections']
 
@@ -62,6 +63,7 @@ interface SearchBarProps {
 }
 
 const SearchBar: FC<SearchBarProps> = ({onChange, setSuggestion}) : JSX.Element => {
+  
   return (
     <>
       <div className='text-left flex laptop:ml-margin-left-6'>
@@ -81,6 +83,7 @@ const Navbar = () => {
   const jwt = Cookies.get('jwt')
 
   const [search, setSearch] = useState<string>('');
+  const disconnect = useDisconnect()
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value)
@@ -136,7 +139,7 @@ const Navbar = () => {
             <div className='flex items-center text-sm laptop:text-lg '>
               {!isLoading && jwt ?
                 <div className='flex items-center space-x-5'>
-                  <button className='font-semibold border-2 rounded-md px-4 py-2 laptop:py-2 laptop:px-5 border-[#E20EF9]' onClick={() => connectWallet()}>{address ? <p className='text-xs'>{address.slice(0,15)+'...'} </p> : <p className='text-sm'>Connect Wallet</p>}</button>
+                  <button className='font-semibold border-2 rounded-md px-4 py-2 laptop:py-2 laptop:px-5 border-[#E20EF9]' onClick={() => !address ? connectWallet() : disconnect()}>{address ? <p className='text-xs'>{address.slice(0,15)+'...'} </p> : <p className='text-sm'>Connect Wallet</p>}</button>
                   <Link to={'/user'} className="laptop:px-1">
                     <img src={user} alt="userProfile" className='h-11 w-11 rounded-full  hover:cursor-pointer' />
                   </Link>
