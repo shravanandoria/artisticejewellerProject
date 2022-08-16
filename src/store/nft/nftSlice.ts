@@ -51,23 +51,25 @@ export const nftBidding = createAsyncThunk('nft/bid', async (data: BidInterface,
             },
             data: {data : {name: Cookies.get('name'), price: bidPrice, nft: nft_id, nftId: nft_id}}
         });
+        console.log({bidRes})
     } catch (error) {
         console.log((error as Error).message);
     }
 })
 
-export const fetchNftBids = createAsyncThunk('nft/fetchBids', async (nftId: number, thunkApi) => {    
+export const fetchNftBids = createAsyncThunk('nft/fetchBids', async (nftId: number, thunkApi) => {  
+    console.log('fetch bid called')  
     try {
         const res = await axios({
             url: `http://localhost:1337/api/nfts?filters[nftId]=${nftId}&populate=bids`,
             method: 'get'
         });
         const {data} = res;
-        console.log({data});
+        console.log({sliceData: data});
         if(data.data.length < 1) return undefined;
         return data.data[0].attributes.bids.data;
     } catch (error) {
-        return (error as Error).message;     
+        return thunkApi.rejectWithValue((error as Error).message);
     }
 })
 

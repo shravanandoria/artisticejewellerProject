@@ -51,14 +51,13 @@ interface BidModalProps {
 //Bid Item Component
 const BidItem : FC<BidItemProps> = ({date,  profile, price, name, id}) => {
     return <>
-    <div className='my-6 '>
-        <div>{price}</div>
-        <div className='flex items-center gap-x-3 '>
-            <img src={u1} alt="user" className='h-10 w-10 rounded-full' />
-            <div className='text-xs laptop:text-sm'>
-                <p>Listed for resell by <b>{name}</b></p>
-                <p className='text-gray-500 text-sm'>22 aug</p>
+    <div className='flex items-center space-x-2'>
+        <div><img src={u1} alt="user" className='h-10 w-10 rounded-full my-2'/></div>
+        <div className='flex flex-col justify-center '>
+            <div>
+                <b> {name}</b> has made the bid of <b> {price} ETH</b> 
             </div>
+            <div>22 Aug</div>
         </div>
     </div>
     </>
@@ -115,7 +114,6 @@ const BiddingPage = () => {
     const { data: listing, isLoading, error } = useActiveListings(marketplace, {tokenId: nftId});
     const { data } = useActiveListings(marketplace);
     const listingInfo = data as AuctionListing[];
-
     const [bidders, setBidders] = useState<bidderInterface[]>([]);
     const [expiryTime, setExpiryTime] = useState({day: 0, hours: 0, mins: 0, secs: 0});
     const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -135,9 +133,9 @@ const BiddingPage = () => {
         setError('')
         setLoading(true)
         try {
-        const nftListingId = listingInfo[0].id.toString(); 
-        const bid = await marketplace?.auction.makeBid(nftListingId, bidPrice)
-        if(!bid) return console.log('something not working');
+        // const nftListingId = listingInfo[0].id.toString(); 
+        // const bid = await marketplace?.auction.makeBid(nftListingId, bidPrice)
+        // if(!bid) return console.log('something not working');
         await dispatch(nftBidding({nftName: `${listingInfo[0].asset.name}`, bidPrice, nftId: listingInfo[0].id}))
         dispatch(fetchNftBids(nftId));
         setModalOpen(false)
@@ -158,9 +156,7 @@ const BiddingPage = () => {
     }
 
     useEffect(() => {
-        dispatch(fetchNftBids(nftId));
-        console.log({bidData})
-        
+        // dispatch(fetchNftBids(nftId));   
     }, []);
 
     return (
@@ -270,9 +266,13 @@ const BiddingPage = () => {
                                 <p className='text-[#E20EF9]'>Biddings</p>
                             </div>
                             <hr className='bg-black mt-5' style={{height: '2px'}} />
-                            {bidData && bidData.map(item => (
+                            {/* {bidData && bidData.map(item => (
                                  <BidItem key={item.id} name={item.attributes.name} price={item.attributes.price} id={item.id}/>
-                            )).reverse()}
+                            )).reverse()} */}
+                                 <BidItem name={'shravan'} price={'4'} id={"1"}/>
+                                 <BidItem name={'anirudh'} price={'3.2'} id={"2"}/>
+                                 <BidItem name={'ronit'} price={'2.1'} id={"3"}/>
+                                 <BidItem name={'rohan'} price={'2'} id={"4"}/>
                         </div>}
                     </div>
                 </div>
