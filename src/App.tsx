@@ -14,6 +14,7 @@ import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ExplorePage from './pages/ExplorePage';
+import Contact from './pages/Contact/Contact';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path='/login' element={<LoginPage/>}/>
             <Route path='/user' element={<UserProfilePage/>}/>
             <Route path='/explore' element={<ExplorePage/>}/>
+            <Route path='/contact' element={<Contact/>}/>
           </Routes>
           <Footer/>
       </BrowserRouter>

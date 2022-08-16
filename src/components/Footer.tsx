@@ -29,7 +29,7 @@ const Footer = () => {
                     <div className=''>
                         <h1 className='text-[#E20EF9]  my-3'>Marketplace</h1>
                         <ul>
-                            <li> <Link to="/">Explore</Link></li>
+                            <li> <Link to="/explore">Explore</Link></li>
                             <li><Link to="/collections">Collections</Link></li>
                             <li><Link to="/creators">Creators</Link></li>
                             <li><a href="https://events.ibentos.com/ArtGallary/welcome.html" target={'_blank'}>Metaverse</a></li>
@@ -42,16 +42,17 @@ const Footer = () => {
                             <li>Privacy Policy</li>
                             <li>Terms and Conditions</li>
                             <li>Community</li>
+                            <li ><a href="/contact">Contact Us</a></li>
                             <li>Help</li>
                         </ul>
                     </div>
                 </div>
                 <div className='flex justify-center gap-x-3 py-3 my-5 laptop:mr-56'>
-                    <div className='rounded-full bg-[#707070] p-2 '><img src={discord} alt="discord" className='h-4 w-4'/></div>
-                    <div className='rounded-full bg-[#707070] p-2 '><img src={twitter} alt="twitter" className='h-4 w-4'/></div>
-                    <div className='rounded-full bg-[#707070] p-2 '><img src={instagram} alt="instagram" className='h-4 w-4'/></div>
-                    <div className='rounded-full bg-[#707070] p-2 '><img src={telegram} alt="telegram" className='h-4 w-4'/></div>
-                    <div className='rounded-full bg-[#707070] p-2 '><img src={facebook} alt="facebook" className='h-4 w-4'/></div>
+                    <div className='rounded-full bg-[#707070] p-2 '><a href="https://twitter.com/jeweller_aj" target="_blank"><img src={twitter} alt="twitter" className='h-4 w-4'/></a></div>
+                    <div className='rounded-full bg-[#707070] p-2 '><a href="https://www.instagram.com/theartisticjeweller/" target="_blank"><img src={instagram} alt="instagram" className='h-4 w-4'/></a></div>
+                    <div className='rounded-full bg-[#707070] p-2 '><a href="https://discord.com/" target="_blank"><img src={discord} alt="discord" className='h-4 w-4'/></a></div>
+                    <div className='rounded-full bg-[#707070] p-2 '><a href="https://telegram.com/" target="_blank"><img src={telegram} alt="telegram" className='h-4 w-4'/></a></div>
+                    <div className='rounded-full bg-[#707070] p-2 '><a href="https://facebook.com/" target="_blank"><img src={facebook} alt="facebook" className='h-4 w-4'/></a></div>
                 </div>
             </div>
             <div>

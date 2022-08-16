@@ -1,0 +1,101 @@
+.contactUsBox{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 150px;
+}
+
+.contactUsBox .leftBox .headText{
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.contactUsBox .leftBox .paraText{
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+/* form  */
+
+.contactUsBox .rightBox form{
+    display: flex;
+    flex-wrap: wrap;
+    width: 400px;
+    /* position: relative; */
+}
+
+.contactUsBox .rightBox form .inputDiv{
+    padding: 10px;
+    width: 100%;
+    
+}
+
+.contactUsBox .rightBox form input{
+    background-color: #f7f7f7;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid #f8c0ff;
+    outline: none;
+    padding: 4px;
+    width: 90%;
+    
+}
+
+.contactUsBox .rightBox form textarea{
+    background-color: #f3f3f3;
+    height: 120px;
+    border-radius: 5px;
+    border: 1px solid #f8c0ff;
+    outline: none;
+    padding: 4px;
+    
+}
+
+.contactUsBox .rightBox form .emailDiv{
+    width: 100%;
+    
+}
+
+.contactUsBox .rightBox form .emailInput{
+    width: 90%;
+}
+
+
+.contactUsBox .rightBox button{
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: #3434ff;
+    color: white;
+    margin-left: 10px;
+    
+}
+
+.contactUsBox .rightBox button:hover{
+    background-color: #1414ff;
+    
+}
+
+
+@media (max-width:600px){
+    .contactUsBox{
+        padding: 50px 25px;
+    }
+    
+}
+
+@media (max-width:400px){
+    .contactUsBox{
+        padding: 50px 25px;
+    }
+    .contactUsBox .leftBox .headText{
+        font-size: 25px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .contactUsBox .rightBox form{
+        width: 300px;
+    }
+    
+}
