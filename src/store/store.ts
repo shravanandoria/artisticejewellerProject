@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-import userSlice from './user/userSlice'
+import userSlice from './user/userSlice';
+import nftSlice from './nft/nftSlice';
 export const store = configureStore({
   reducer: {
-    user: userSlice
+    user: userSlice,
+    nft: nftSlice,
   },
 })
 

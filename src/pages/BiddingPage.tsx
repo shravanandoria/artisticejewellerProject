@@ -2,9 +2,15 @@ import timer from '../assets/icons/timer.png';
 import BtnPrimary from '../components/BtnPrimary';
 import eth from '../assets/icons/ethereum.png';
 import XIcon from '@heroicons/react/solid/XIcon';
-import axios from 'axios'
+import moment from 'moment';
+
 import { useDispatch } from 'react-redux';
 import { nftBidding } from '../store/nft/nftSlice';
+import { useSelector } from 'react-redux';
+import { fetchNftBids } from '../store/nft/nftSlice';
+import spinner from '../assets/spinner.gif';
+
+
 //Marketplace Imports
 import { useAddress } from '@thirdweb-dev/react';
 import { useMarketplace, useActiveListings } from '@thirdweb-dev/react';
@@ -19,59 +25,28 @@ import u2 from '../assets/users/u2.jpg';
 import u3 from '../assets/users/u3.jpg';
 import u4 from '../assets/users/u4.jpg';
 import u5 from '../assets/users/u5.jpg';
-import { AppDispatch } from '../store/store';
-
-
-// attributes:
-// createdAt: "2022-08-12T13:05:33.198Z"
-// name: "dasd"
-// nftId: 38
-// price: 0.04
-// publishedAt: "2022-08-12T13:05:33.194Z"
-// updatedAt: "2022-08-12T13:05:33.198Z"
-// [[Prototype]]: Object
-// id: 5
+import { AppDispatch, RootState } from '../store/store';
 
 interface bidderInterface {
     id: number;
     attributes: {name: string; publishedAt: string; price: string, profilePic?: string}
 }
-
 interface BidItemProps {
     profile?: string;
-    id: number;
+    id: string;
     date?: string;
     price: string;
     name: string;
 }
-
-const fakeBidData = [
-    {
-        profile: u1,
-        id: '@Andoria',
-        date: '24th june 2022'
-    },
-    {
-        profile: u2,
-        id: '@Ronit.B',
-        date: '2nd aug 2022'
-    },
-    {
-        profile: u3,
-        id: '@Abhishek',
-        date: '13th june 2022'
-    },
-    {
-        profile: u4,
-        id: '@Sam.Daniels',
-        date: '2nd aug 2022'
-    },
-    {
-        profile: u5,
-        id: '@viki.bora',
-        date: '18th jan 2022'
-    },
-]
+interface BidModalProps {
+    setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    reservePrice: string;
+    handleChange: ChangeEventHandler<HTMLInputElement>;
+    onSubmit: (e: any) => void;
+    loading: boolean;
+    errorMessage?: string;
+    disableClose?: boolean
+}
 
 //Bid Item Component
 const BidItem : FC<BidItemProps> = ({date,  profile, price, name, id}) => {
@@ -88,18 +63,8 @@ const BidItem : FC<BidItemProps> = ({date,  profile, price, name, id}) => {
     </div>
     </>
 }
-
-interface BidModalProps {
-    setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    reservePrice: string;
-    handleChange: ChangeEventHandler<HTMLInputElement>;
-    onSubmit: (e: any) => void;
-    loading: boolean;
-    errorMessage?: string;
-}
-
 //Bid Modal Popup
-const BidPopup = ({setModalOpen, reservePrice, handleChange, onSubmit, loading, errorMessage} : BidModalProps) => (
+const BidPopup = ({setModalOpen, reservePrice, handleChange, onSubmit, loading, errorMessage, disableClose} : BidModalProps) => (
     <>
     <form onSubmit={onSubmit}>
         <div className={`fixed overflow-y-scroll top-0 h-full w-full`}>
@@ -107,7 +72,7 @@ const BidPopup = ({setModalOpen, reservePrice, handleChange, onSubmit, loading, 
                 <div className='h-full flex justify-center items-center px-5 tablet:px-28 laptop:px-96' >
                     <div className='bg-white h-fit w-fit rounded-xl shadow-xl border-2  '>
                         <div className='flex justify-end relative'>
-                            <div className='m-3 absolute hover:cursor-pointer' onClick={() => setModalOpen(false)}><XIcon fill='gray'  className='h-7 w-7'/></div>
+                            <button disabled={loading} className='m-3 absolute hover:cursor-pointer' onClick={() => setModalOpen(false)}><XIcon fill='gray'  className='h-7 w-7'/></button>
                         </div>
                         <h1 className='text-center my-4 font-bold text-lg tablet:text-xl'>Make an offer</h1> 
                         <div className='flex flex-col items-center'>
@@ -140,7 +105,7 @@ const BidPopup = ({setModalOpen, reservePrice, handleChange, onSubmit, loading, 
     </>
 );
 
-const nftId = 11
+const nftId = 14
 
 const BiddingPage = () => {
     //Marketplace
@@ -151,49 +116,57 @@ const BiddingPage = () => {
     const { data } = useActiveListings(marketplace);
     const listingInfo = data as AuctionListing[];
 
-    const [bidders, setBidders] = useState<bidderInterface[]>()
+    const [bidders, setBidders] = useState<bidderInterface[]>([]);
+    const [expiryTime, setExpiryTime] = useState({day: 0, hours: 0, mins: 0, secs: 0});
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [bidPrice, setBidPrice] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setError] = useState<string>('');
     const jwt = Cookies.get('jwt');
+    const {bidData, bidLoading} = useSelector((store: RootState) => store.nft)
 
+    
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setBidPrice(e.target.value)
     }
 
     const handleSubmit = async (e: React.ChangeEvent<HTMLInputElement>, tokenId : string) => {
         e.preventDefault();
+        if(!address) return setError('Please Connect Your Wallet')
         setError('')
         setLoading(true)
         try {
-        const nftListingId = listingInfo[0].id.toString();
+        const nftListingId = listingInfo[0].id.toString(); 
         const bid = await marketplace?.auction.makeBid(nftListingId, bidPrice)
-        console.log({bid})
         if(!bid) return console.log('something not working');
-        dispatch(nftBidding({nftName: `${listingInfo[0].asset.name}`, bidPrice, nftId: listingInfo[0].id}))
+        await dispatch(nftBidding({nftName: `${listingInfo[0].asset.name}`, bidPrice, nftId: listingInfo[0].id}))
+        dispatch(fetchNftBids(nftId));
+        setModalOpen(false)
         } catch (error) {
-            setError("Transaction failed")
+            setError("Transaction failed");
         }
         setLoading(false)
     }
 
-    const fetchBidsData = async () => {
-            const res = await axios({
-                url: `http://localhost:1337/api/nfts?filters[nftId]=${nftId}&populate=bids`,
-                method: 'get'
-            });
-            const {data} = res;
-            setBidders(data.data[0].attributes.bids.data)
+    const auctionTimer = () => {
+        if(listingInfo){
+            setInterval(() => {
+            const d = new Date(0);
+            d.setUTCSeconds(parseInt(listingInfo[0].endTimeInEpochSeconds.toString()));
+            setExpiryTime({...expiryTime, day: d.getDay(), mins: d.getMinutes(), hours: d.getHours(), secs: d.getSeconds()})            
+            }, 1000)
+        }
     }
 
     useEffect(() => {
-        fetchBidsData()
+        dispatch(fetchNftBids(nftId));
+        console.log({bidData})
+        
     }, []);
 
     return (
         <>
-            {isLoading ? <div><Spinner/></div> : !listingInfo[0] ? "nft auction over" : 
+            {isLoading ? <div><Spinner/></div> : listingInfo &&  listingInfo.length < 1 ? "nft auction over" : 
             <div>
                 {/* MODAL POPUP */}
                 {modalOpen &&
@@ -262,9 +235,10 @@ const BiddingPage = () => {
                                 </div>
                                 <div>
                                     <div className='grid grid-cols-4 text-center laptop:gap-x-2 text-md'>
+                                        {/* <p>{expiryTime.days}</p> */}
                                         <p>0</p>
-                                        <p>2</p>
-                                        <p>25</p>
+                                        <p>0</p>
+                                        <p>0</p>
                                         <p>0</p>
                                         <p>days</p>
                                         <p>hours</p>
@@ -290,15 +264,17 @@ const BiddingPage = () => {
                                 }} content='Place a bid' className='text-xs font-semibold rounded-full laptop:text-md '/>
                             </div>
                         </div>
-                        <div className='mt-9'>
+                        {bidLoading ? 
+                        <div className='flex justify-center w-full'><img src={spinner} alt="spinner" className='h-20 w-20 ' /></div> : 
+                        <div className='mt-9 overflow-clip'>
                             <div className='flex space-x-3 font-semibold my-3 laptop:text-lg laptop:space-x-7'>
                                 <p className='text-[#E20EF9]'>Biddings</p>
                             </div>
                             <hr className='bg-black mt-5' style={{height: '2px'}} />
-                            {bidders && bidders.length > 0 ? bidders.map((item) => (
-                                <BidItem key={item.id} name={item.attributes.name} price={item.attributes.price} id={item.id}/>
-                            )).reverse() : <p className='text-black'>No biddings</p>}
-                        </div>
+                            {bidData && bidData.map(item => (
+                                 <BidItem key={item.id} name={item.attributes.name} price={item.attributes.price} id={item.id}/>
+                            )).reverse()}
+                        </div>}
                     </div>
                 </div>
             </div>

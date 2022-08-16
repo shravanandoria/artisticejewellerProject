@@ -6,7 +6,7 @@ interface nestedData {
     data: [{id: string, attributes: string}]
 }
 interface resInter{
-    data:  nestedData
+    data:  nestedData;
 }
 
 interface BidInterface {
@@ -15,16 +15,18 @@ interface BidInterface {
     bidPrice: string;
 }
 
-interface initialStateInterface{
-    
+interface initialStateInterface{    
+    id: number | undefined;
+    bidData: [{id: string, attributes: {name: string, nftId: string, price: string, createdAt: string}}] | [];
+    bidLoading: boolean;
+    error: string | unknown;
 }
 
 export const nftBidding = createAsyncThunk('nft/bid', async (data: BidInterface, thunkApi) => {
     const jwt = Cookies.get('jwt')
     const {bidPrice, nftName, nftId} = data;
-    console.log({bidPrice, nftName, nftId})
     try {
-        //FETCHING NFT BY TOKEN ID 
+        //FETCHING NFT BY TOKEN ID
         const {data}  : resInter = await axios.get(`http://localhost:1337/api/nfts?filters[nftId]=${nftId}`);
         const nft =  data.data[0]
         let res;
@@ -35,14 +37,10 @@ export const nftBidding = createAsyncThunk('nft/bid', async (data: BidInterface,
                 headers: {
                     Authorization: `Bearer ${jwt}`
                 },
-                // data: {data: {name: listingInfo[0].asset.name, tokenId: listingInfo[0].tokenId.toString()}}
                 data: {data: {name: nftName, nftId: nftId}}
             });
-            console.log(res)
         }
         const nft_id = nft ? nft.id : res?.data.data.id;
-        // console.log({nftTokenId})
-        console.log(nft_id)
 
         // //NFT Id to link bidder with nft
         const bidRes = await axios({
@@ -58,14 +56,44 @@ export const nftBidding = createAsyncThunk('nft/bid', async (data: BidInterface,
     }
 })
 
+export const fetchNftBids = createAsyncThunk('nft/fetchBids', async (nftId: number, thunkApi) => {    
+    try {
+        const res = await axios({
+            url: `http://localhost:1337/api/nfts?filters[nftId]=${nftId}&populate=bids`,
+            method: 'get'
+        });
+        const {data} = res;
+        console.log({data});
+        if(data.data.length < 1) return undefined;
+        return data.data[0].attributes.bids.data;
+    } catch (error) {
+        return (error as Error).message;     
+    }
+})
+
+const initialState : initialStateInterface = {
+    id: undefined,
+    bidData: [],
+    bidLoading: false,
+    error: ''
+} 
+
 const nftSlice = createSlice({
     name: 'nft',
-    initialState: '',
+    initialState,
     reducers: {},
     extraReducers: (builder) => {
-        // builder.addCase(bid.pending, (state) => {
-
-        // })
+        builder.addCase(fetchNftBids.pending, (state) => {
+            state.bidLoading = true;        
+        })
+        builder.addCase(fetchNftBids.fulfilled, (state, action) => {
+            state.bidLoading = false;
+            state.bidData = action.payload;
+        })
+        builder.addCase(fetchNftBids.rejected, (state, action) => {
+            state.bidLoading = false;
+            state.error = action.payload;      
+        })
 
     }
 })
