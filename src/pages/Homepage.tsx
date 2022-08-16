@@ -7,6 +7,7 @@ const Homepage = () => {
   return (
       <>
       <div className='mt-4 '>
+        sample
         <Section1/>
         <TrendingSection/>
         <TopArtistSection/>

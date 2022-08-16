@@ -124,7 +124,6 @@ const BiddingPage = () => {
     const [errorMessage, setError] = useState<string>('');
     const jwt = Cookies.get('jwt');
     const {bidData, bidLoading} = useSelector((store: RootState) => store.nft)
-
     
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setBidPrice(e.target.value)
